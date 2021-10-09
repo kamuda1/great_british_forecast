@@ -135,7 +135,7 @@ def process_episode(bakers_results_season_pd, episode_idx, episode_pd, all_featu
     return bakers_results_season_pd, all_features, all_targets, all_targets_per_episode, all_data_df
 
 
-def get_features_and_targets():
+def get_features_and_targets() -> (List, List, pandas.DataFrame):
     """ Does all the things. TODO: organize & atomize """
     all_seasons, final_winners = etl_seasons_data()
 

@@ -1,14 +1,14 @@
-import numpy as np
-import pandas as pd
+from great_british_utils import get_features_and_targets
 
-from great_british_utils import *
+import matplotlib.pyplot as plt
+import numpy as np
 
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import precision_recall_fscore_support
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 
-
+# Load the data
 all_features, all_targets, all_data_df = get_features_and_targets()
 
 # Do the ML
@@ -35,5 +35,30 @@ print(precision_recall_fscore_support(test_targets_npy, rf_clf.predict(test_feat
 
 all_data_df['prob_winning'] = all_data_df.apply(lambda row: rf_clf.predict_proba([row['score_freq']]), axis=1)
 all_data_tmp = all_data_df[all_data_df['baker'] == 'Jo']
+
+# play with probs and evidence
+train_probs_win = rf_clf.predict_proba(train_features_npy)[:, 1]
+test_probs_win = rf_clf.predict_proba(test_features_npy)[:, 1]
+
+
+def odds_from_prob(prob):
+    return prob / (1 - prob)
+
+
+train_odds = odds_from_prob(train_probs_win)
+test_odds = odds_from_prob(test_probs_win)
+
+train_log_odds = np.log(train_odds)
+test_log_odds = np.log(test_odds)
+
+plt.figure()
+plt.title('test_log_odds')
+plt.xlabel('Log Odds')
+plt.ylabel('Freq')
+plt.hist(test_log_odds, density=True, stacked=True, label='test',
+         alpha=1.0)
+plt.hist(train_log_odds, density=True, stacked=True, label='train',
+         alpha=0.6)
+plt.legend()
 
 print(5)

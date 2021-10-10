@@ -42,12 +42,14 @@ all_data_tmp = all_data_df[all_data_df['baker'] == 'Jo']
 train_probs_win = rf_clf.predict_proba(train_features_npy)[:, 1]
 test_probs_win = rf_clf.predict_proba(test_features_npy)[:, 1]
 
+def log_odds_from_probs(probs):
+    odds = odds_from_prob(np.array(clean_probs(probs)))
+    log_odds = np.log(odds)
+    return log_odds
 
-train_odds = odds_from_prob(np.array(clean_probs(train_probs_win)))
-test_odds = odds_from_prob(np.array(clean_probs(test_probs_win)))
+train_log_odds = log_odds_from_probs(train_probs_win)
+test_log_odds = log_odds_from_probs(test_probs_win)
 
-train_log_odds = np.log(train_odds)
-test_log_odds = np.log(test_odds)
 
 plt.figure()
 plt.title('Evidence For All Events')

@@ -192,3 +192,9 @@ def test_probs():
     probs = np.array([0.1, 0.25, 0.5, 0.75, 0.9, 0, 1])
     print(probs)
     print(clean_probs(probs))
+
+def log_odds_from_probs(probs):
+    odds = odds_from_prob(np.array(clean_probs(probs)))
+    log_odds = np.log(odds)
+    return log_odds
+

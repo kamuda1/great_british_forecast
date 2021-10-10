@@ -160,3 +160,35 @@ def get_features_and_targets() -> (List, List, pandas.DataFrame):
                 all_data_df, orig_num_bakers, season_index, episode_list, temp_winner)
 
     return all_features, all_targets, all_data_df
+
+
+def softmax(x):
+    return 1 / (1 + np.exp(-x))
+
+
+def odds_from_prob(prob):
+    return prob / (1 - prob)
+
+
+def clean_probs(probs):
+    """Makes the impossible possible. An approximation."""
+    if np.min(probs) == 0:
+        second_min_prob = np.min([prob for prob in probs if prob != 0])
+        probs_min_update = softmax(np.log(odds_from_prob(second_min_prob)) - 1)
+        probs = [prob if prob != 0 else probs_min_update for prob in probs]
+
+    if np.max(probs) == 1:
+        second_max_prob = np.max([prob for prob in probs if prob != 1])
+        probs_max_update = softmax(np.log(odds_from_prob(second_max_prob)) + 1)
+        probs = [prob if prob != 1 else probs_max_update for prob in probs]
+
+    return probs
+
+
+def test_probs():
+    """
+    TODO: make an actual test
+    """
+    probs = np.array([0.1, 0.25, 0.5, 0.75, 0.9, 0, 1])
+    print(probs)
+    print(clean_probs(probs))

@@ -1,4 +1,4 @@
-from great_british_utils import get_features_and_targets
+from great_british_utils import *
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,21 +11,23 @@ from sklearn.ensemble import RandomForestClassifier
 # Load the data
 all_features, all_targets, all_data_df = get_features_and_targets()
 
-# Do the ML
+# Get features and Train
 all_features_npy = np.vstack(all_features)
 all_targets_npy = np.array(all_targets)
 
 clf = MultinomialNB()
 clf.fit(all_features_npy, all_targets_npy)
 
+# Check out f-score
 y_pred = clf.predict(all_features_npy)
 print(precision_recall_fscore_support(all_targets_npy, y_pred))
 
 all_data_df['prob_winning'] = all_data_df.apply(lambda row: clf.predict_proba([row['score_freq']]), axis=1)
 
+# Train something cooler with a train/test split
 train_features_npy, test_features_npy, train_targets_npy, test_targets_npy = train_test_split(
     all_features_npy, all_targets_npy, test_size=0.33, random_state=42)
-rf_clf = RandomForestClassifier(max_depth=2, random_state=0)
+rf_clf = RandomForestClassifier()
 rf_clf.fit(train_features_npy, train_targets_npy)
 
 print('Train')
@@ -41,24 +43,18 @@ train_probs_win = rf_clf.predict_proba(train_features_npy)[:, 1]
 test_probs_win = rf_clf.predict_proba(test_features_npy)[:, 1]
 
 
-def odds_from_prob(prob):
-    return prob / (1 - prob)
-
-
-train_odds = odds_from_prob(train_probs_win)
-test_odds = odds_from_prob(test_probs_win)
+train_odds = odds_from_prob(np.array(clean_probs(train_probs_win)))
+test_odds = odds_from_prob(np.array(clean_probs(test_probs_win)))
 
 train_log_odds = np.log(train_odds)
 test_log_odds = np.log(test_odds)
 
 plt.figure()
-plt.title('test_log_odds')
-plt.xlabel('Log Odds')
+plt.title('Evidence For All Events')
+plt.xlabel('Evidence (logits)')
 plt.ylabel('Freq')
-plt.hist(test_log_odds, density=True, stacked=True, label='test',
+plt.hist(test_log_odds, 30, density=True, stacked=True, label='test',
          alpha=1.0)
-plt.hist(train_log_odds, density=True, stacked=True, label='train',
+plt.hist(train_log_odds, 30, density=True, stacked=True, label='train',
          alpha=0.6)
 plt.legend()
-
-print(5)
